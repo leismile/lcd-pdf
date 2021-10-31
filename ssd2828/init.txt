@@ -1,0 +1,581 @@
+/**********************TTL 输出设置参考************/
+#define	LCD_XSIZE	720
+#define	LCD_YSIZE	1280
+
+#define	LCD_BPP		24           //16  24位选择
+
+#define  PCLK            60          //60MHZ
+
+
+   
+#define	HBPD  120
+#define	HFPD  60
+#define	HSPW  10
+
+#define	VBPD  30
+#define	VFPD  30
+#define	VSPW  10
+/***************************************************/
+ 
+void LCD_Init() 
+{  
+
+
+	LCD_SPI_Init();//SPI 口初始化
+	
+	//// Reset LCD Driver//// 复位
+	LCD_RST_SET;
+	delay_ms(10); // Delay 1ms
+    LCD_RST_CLR;
+    delay_ms(50); // Delay 10ms // This Delay time is necessary
+    LCD_RST_SET;
+	delay_ms(100); // Delay 50 ms
+
+	//SSD2828_Initial         SSD2828 打开0通道 LP模式  进行初始化设置
+
+				        W_C(0xb7);
+				        W_D(0x50);//50=TX_CLK 70=PCLK
+				        W_D(0x00);   //Configuration Register
+
+				        W_C(0xb8);
+				        W_D(0x00);
+				        W_D(0x00);   //VC(Virtual ChannelID) Control Register
+
+				        W_C(0xb9);
+				        W_D(0x00);//1=PLL disable
+				        W_D(0x00);
+	                               //TX_CLK/MS should be between 5Mhz to100Mhz
+				        W_C(0xBA);//PLL=(TX_CLK/MS)*NS 8228=480M 4428=240M  061E=120M 4214=240M 821E=360M 8219=300M
+				        W_D(0x14);//D7-0=NS(0x01 : NS=1)
+				        W_D(0x42);//D15-14=PLL范围 00=62.5-125 01=126-250 10=251-500 11=501-1000  DB12-8=MS(01:MS=1)
+
+				        W_C(0xBB);//LP Clock Divider LP clock = 400MHz / LPD / 8 = 240 / 8 / 4 = 7.5MHz
+				        W_D(0x03);//D5-0=LPD=0x1 – Divide by 2
+				        W_D(0x00);
+
+				        W_C(0xb9);
+				       	W_D(0x01);//1=PLL disable
+				       	W_D(0x00);
+				        //MIPI lane configuration
+				        W_C(0xDE);//通道数
+				        W_D(0x03);//11=4LANE 10=3LANE 01=2LANE 00=1LANE
+				        W_D(0x00);
+
+				        W_C(0xc9);
+				        W_D(0x02);
+				        W_D(0x23);   //p1: HS-Data-zero  p2: HS-Data- prepare  --> 8031 issue
+				       // delay_ms(100);
+
+
+/*============================================================================*/
+
+	//LCD driver initialization
+	W_C(0xB7);
+	W_D(0x10);//10=TX_CLK 30=PCLK
+	W_D(0x02);
+
+	W_C(0xBD);
+	W_D(0x00);
+	W_D(0x00);
+
+
+/*********************LCD屏初始化******************/
+
+//Test command
+GP_COMMAD_PA(5);W_D(0xFF);W_D(0xAA);W_D(0x55);W_D(0x25);W_D(0x01);
+GP_COMMAD_PA(2);W_D(0x6F);W_D(0x21);
+GP_COMMAD_PA(2);W_D(0xF7);W_D(0x01);
+//DELAY 1
+GP_COMMAD_PA(2);W_D(0x6F);W_D(0x21);
+GP_COMMAD_PA(2);W_D(0xF7);W_D(0x00);
+GP_COMMAD_PA(5);W_D(0xFF);W_D(0xAA);W_D(0x55);W_D(0x25);W_D(0x00);
+
+
+//---------------Page 0 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x00);
+
+//Display Option Control: 720RGB
+GP_COMMAD_PA(3);W_D(0xB1);W_D(0x68);W_D(0x21);
+
+//Source Output Data Hold Time Control
+GP_COMMAD_PA(2);W_D(0xB6);W_D(0x08);
+
+//EQ Control Function for Source
+GP_COMMAD_PA(4);W_D(0xB8);W_D(0x01);W_D(0x02);W_D(0x08);
+
+//Source Driver Control
+GP_COMMAD_PA(3);W_D(0xBB);W_D(0x44);W_D(0x44);
+
+//Inversion Driving Control: Column inversion
+GP_COMMAD_PA(3);W_D(0xBC);W_D(0x00);W_D(0x00);
+
+//Display Timing Control
+GP_COMMAD_PA(6);W_D(0xBD);W_D(0x02);W_D(0x68);W_D(0x10);W_D(0x10);W_D(0x00);
+
+//Vsync Detection Control
+GP_COMMAD_PA(2);W_D(0xC8);W_D(0x80);
+
+//---------------Page 1 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x01);
+
+
+//Setting VGH Voltage VGH=17V
+GP_COMMAD_PA(3);W_D(0xB3);W_D(0x32);W_D(0x32);
+
+//Setting VGLX Voltage VGL=-12V
+GP_COMMAD_PA(3);W_D(0xB4);W_D(0x19);W_D(0x19);
+
+//HSOUT Signal Control
+GP_COMMAD_PA(3);W_D(0xB5);W_D(0x05);W_D(0x05);
+
+//Power Control for VGH Boosting Times
+GP_COMMAD_PA(3);W_D(0xB9);W_D(0x46);W_D(0x46);
+
+//Power Control for VGLX Boosting Times
+GP_COMMAD_PA(3);W_D(0xBA);W_D(0x36);W_D(0x36);
+
+//Setting VGMP and VGSP Voltage: 4.3V & 0.3V
+GP_COMMAD_PA(3);W_D(0xBC);W_D(0x68);W_D(0x01);
+GP_COMMAD_PA(3);W_D(0xBD);W_D(0x68);W_D(0x01);
+
+//Setting VCOM Offset Voltage
+GP_COMMAD_PA(2);W_D(0xBE);W_D(0x61);
+
+//General Purpose Output Pins Control
+GP_COMMAD_PA(2);W_D(0xC0);W_D(0x0C);
+
+
+// Gate Signal Voltages Control
+GP_COMMAD_PA(2);W_D(0xCA);W_D(0x00);
+
+
+//---------------Page 2 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x02);
+
+
+GP_COMMAD_PA(2);W_D(0xEE);W_D(0x01);						
+GP_COMMAD_PA(17);W_D(0xB0);W_D(0x00);W_D(0x00);W_D(0x00);W_D(0x0C);W_D(0x00);W_D(0x22);W_D(0x00);W_D(0x35);W_D(0x00);W_D(0x47);W_D(0x00);W_D(0x68);W_D(0x00);W_D(0x85);W_D(0x00);W_D(0xB8);							
+GP_COMMAD_PA(17);W_D(0xB1);W_D(0x00);W_D(0xE3);W_D(0x01);W_D(0x2B);W_D(0x01);W_D(0x67);W_D(0x01);W_D(0xC5);W_D(0x02);W_D(0x15);W_D(0x02);W_D(0x18);W_D(0x02);W_D(0x60);W_D(0x02);W_D(0xAA);							
+GP_COMMAD_PA(17);W_D(0xB2);W_D(0x02);W_D(0xD9);W_D(0x03);W_D(0x1B);W_D(0x03);W_D(0x40);W_D(0x03);W_D(0x6D);W_D(0x03);W_D(0x8D);W_D(0x03);W_D(0xB4);W_D(0x03);W_D(0xCE);W_D(0x03);W_D(0xE5);							
+GP_COMMAD_PA(5);W_D(0xB3);W_D(0x03);W_D(0xFB);W_D(0x03);W_D(0xFF);							
+
+						
+//---------------Page 3 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x03);
+
+//EQ Control for Signal Group CLK: EQ off
+GP_COMMAD_PA(3);W_D(0xB0);W_D(0x00);W_D(0x00);
+
+//EQ Control for Signal Group STV: EQ off
+GP_COMMAD_PA(3);W_D(0xB1);W_D(0x00);W_D(0x00);
+
+//Control for Signal Type STV01 
+GP_COMMAD_PA(6);W_D(0xB2);W_D(0x05);W_D(0x00);W_D(0xB1);W_D(0x00);W_D(0xB0);
+
+//Control for Signal Type RST01 
+GP_COMMAD_PA(6);W_D(0xB6);W_D(0x05);W_D(0x00);W_D(0xB0);W_D(0x00);W_D(0xB0);
+
+
+//Control for Signal Type CLK01 & CLK02 
+GP_COMMAD_PA(6);W_D(0xBA);W_D(0x53);W_D(0x00);W_D(0xB0);W_D(0x00);W_D(0x00);
+GP_COMMAD_PA(6);W_D(0xBB);W_D(0x53);W_D(0x00);W_D(0xB0);W_D(0x00);W_D(0x00);
+
+
+//Control for Signal Type VDC01=FW & VDC02=BW 
+GP_COMMAD_PA(2);W_D(0xC4);W_D(0x60);
+GP_COMMAD_PA(2);W_D(0xC5);W_D(0xC0);
+
+//---------------Page 5 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x05);
+
+//Sleep-out Initial Control for CLK Signal Type
+GP_COMMAD_PA(3);W_D(0xB0);W_D(0x17);W_D(0x06);
+
+//Sleep-out Initial Control for STV Signal Type
+GP_COMMAD_PA(3);W_D(0xB1);W_D(0x17);W_D(0x06);
+
+//Sleep-out Initial Control for RST Signal Type
+GP_COMMAD_PA(3);W_D(0xB2);W_D(0x17);W_D(0x06);
+
+//Sleep-out Initial Control for VDC1 & 2 Signal Type
+GP_COMMAD_PA(3);W_D(0xB4);W_D(0x17);W_D(0x06);
+GP_COMMAD_PA(3);W_D(0xB5);W_D(0x17);W_D(0x06);
+
+//Operation Initial Control for CLK Signal Type
+GP_COMMAD_PA(2);W_D(0xB8);W_D(0x00);
+
+//Operation Initial Control for STV Signal Type
+GP_COMMAD_PA(2);W_D(0xB9);W_D(0x00);
+
+//Operation Initial Control for RST Signal Type
+GP_COMMAD_PA(2);W_D(0xBA);W_D(0x00);
+
+//Operation Initial Control for VDC Signal Type
+GP_COMMAD_PA(2);W_D(0xBC);W_D(0x02);
+
+//Gate Signal Output Control 
+GP_COMMAD_PA(6);W_D(0xBD);W_D(0x03);W_D(0x01);W_D(0x01);W_D(0x00);W_D(0x03);
+
+//STV01 Pulse Waveform Control 
+GP_COMMAD_PA(2);W_D(0xC0);W_D(0x07);
+
+//RST01 Pulse Waveform Control
+GP_COMMAD_PA(2);W_D(0xC4);W_D(0xA1);
+
+//CLK01 & CLK02 Pulse Waveform Control
+GP_COMMAD_PA(3);W_D(0xC8);W_D(0x03);W_D(0x20);
+GP_COMMAD_PA(3);W_D(0xC9);W_D(0x01);W_D(0x21);
+
+
+//CLK01 & CLK02 Status Control in Vertical Porch Area
+GP_COMMAD_PA(6);W_D(0xD1);W_D(0x00);W_D(0x05);W_D(0x0D);W_D(0x07);W_D(0x00);
+GP_COMMAD_PA(6);W_D(0xD2);W_D(0x00);W_D(0x05);W_D(0x0D);W_D(0x00);W_D(0x00);
+
+//Status Control for CLK Signal Type in Power Off
+GP_COMMAD_PA(2);W_D(0xE5);W_D(0x06);
+
+//Status Control for STV Signal Type in Power Off
+GP_COMMAD_PA(2);W_D(0xE6);W_D(0x06);
+
+//Status Control for RST Signal Type in Power Off
+GP_COMMAD_PA(2);W_D(0xE7);W_D(0x06);
+
+//Status Control for VDC1 & VDC2 Signal Type in Power Off
+GP_COMMAD_PA(2);W_D(0xE9);W_D(0x06);
+GP_COMMAD_PA(2);W_D(0xEA);W_D(0x06);
+
+
+//Gate Signal Status Control for Display Blanking
+GP_COMMAD_PA(2);W_D(0xED);W_D(0x30);
+
+
+//---------------Page 6 Enable-----------------------------------------------------------------------
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x06);
+
+//Gout Mapping
+GP_COMMAD_PA(6);W_D(0xF0);W_D(0x55);W_D(0xAA);W_D(0x52);W_D(0x08);W_D(0x06);
+GP_COMMAD_PA(3);W_D(0xB0);W_D(0x00);W_D(0x10);
+GP_COMMAD_PA(3);W_D(0xB1);W_D(0x12);W_D(0x16);
+GP_COMMAD_PA(3);W_D(0xB2);W_D(0x18);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB3);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB4);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB5);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB6);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB7);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xB8);W_D(0x34);W_D(0x2D);
+GP_COMMAD_PA(3);W_D(0xB9);W_D(0x2E);W_D(0x08);
+GP_COMMAD_PA(3);W_D(0xBA);W_D(0x09);W_D(0x2E);
+GP_COMMAD_PA(3);W_D(0xBB);W_D(0x2D);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xBC);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xBD);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xBE);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xBF);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC0);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC1);W_D(0x34);W_D(0x19);
+GP_COMMAD_PA(3);W_D(0xC2);W_D(0x17);W_D(0x13);
+GP_COMMAD_PA(3);W_D(0xC3);W_D(0x11);W_D(0x01);
+GP_COMMAD_PA(3);W_D(0xE5);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC4);W_D(0x09);W_D(0x19);
+GP_COMMAD_PA(3);W_D(0xC5);W_D(0x17);W_D(0x13);
+GP_COMMAD_PA(3);W_D(0xC6);W_D(0x11);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC7);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC8);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xC9);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xCA);W_D(0x31);W_D(0x29);
+GP_COMMAD_PA(3);W_D(0xCB);W_D(0x2A);W_D(0x33);
+GP_COMMAD_PA(3);W_D(0xCC);W_D(0x2D);W_D(0x2E);
+GP_COMMAD_PA(3);W_D(0xCD);W_D(0x2D);W_D(0x01);
+GP_COMMAD_PA(3);W_D(0xCE);W_D(0x00);W_D(0x2D);
+GP_COMMAD_PA(3);W_D(0xCF);W_D(0x2E);W_D(0x2D);
+GP_COMMAD_PA(3);W_D(0xD0);W_D(0x34);W_D(0x2A);
+GP_COMMAD_PA(3);W_D(0xD1);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xD2);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xD3);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xD4);W_D(0x31);W_D(0x34);
+GP_COMMAD_PA(3);W_D(0xD5);W_D(0x34);W_D(0x10);
+GP_COMMAD_PA(3);W_D(0xD6);W_D(0x12);W_D(0x16);
+GP_COMMAD_PA(3);W_D(0xD7);W_D(0x18);W_D(0x08);
+GP_COMMAD_PA(3);W_D(0xE6);W_D(0x34);W_D(0x34);
+GP_COMMAD_PA(6);W_D(0xD8);W_D(0x00);W_D(0x00);W_D(0x00);W_D(0x00);W_D(0x00);
+GP_COMMAD_PA(6);W_D(0xD9);W_D(0x00);W_D(0x00);W_D(0x00);W_D(0x00);W_D(0x00);
+GP_COMMAD_PA(2);W_D(0xE7);W_D(0x00);
+
+//GP_COMMAD_PA(2);W_D(0x35);W_D(0x00);
+
+//GP_COMMAD_PA(1);W_D(0x11);
+//DELAY 120
+//GP_COMMAD_PA(1);W_D(0x29);
+
+
+
+GP_COMMAD_PA(2);W_D(0x00);W_D(0x00);             //Orise mode disable
+GP_COMMAD_PA(2);W_D(0x35);W_D(0x01);
+
+GP_COMMAD_PA(2);W_D(0x51);W_D(0xff);  //7f
+
+GP_COMMAD_PA(2);W_D(0x53);W_D(0x2C);
+
+
+
+GP_COMMAD_PA(2);W_D(0x35);W_D(0x00);	
+
+GP_COMMAD_PA(1);W_D(0x11);  	// SLPOUT
+delay_ms(120);
+
+
+//DISP ON
+//SSD_Number(0x01);
+GP_COMMAD_PA(1);W_D(0x29);  	// DSPON
+delay_ms(50);
+
+//--- TE----//
+//GP_COMMAD_PA(2);W_D(0x35);W_D(0x00);
+
+
+
+/*****************LCD初始化完成**************************/
+
+
+
+
+
+
+
+
+			    				  
+
+
+
+
+
+//SSD2828 对屏初始化完成后，打开所有通道，进行显示准备
+
+	//SSD2825_Initial
+	W_C(0xb7);
+	W_D(0x50);
+	W_D(0x00);   //Configuration Register
+
+	W_C(0xb8);
+	W_D(0x00);
+	W_D(0x00);   //VC(Virtual ChannelID) Control Register
+
+	W_C(0xb9);
+	W_D(0x00);//1=PLL disable
+	W_D(0x00);
+
+	W_C(0xBA);//PLL=(TX_CLK/MS)*NS 8228=480M 4428=240M  061E=120M 4214=240M 821E=360M 8219=300M 8225=444M 8224=432
+	W_D(0x2a);//D7-0=NS(0x01 : NS=1)
+	W_D(0x82);//D15-14=PLL范围 00=62.5-125 01=126-250 10=251-500 11=501-1000  DB12-8=MS(01:MS=1)
+
+	W_C(0xBB);//LP Clock Divider LP clock = 400MHz / LPD / 8 = 480 / 8/ 8 = 7MHz
+	W_D(0x07);//D5-0=LPD=0x1 – Divide by 2
+	W_D(0x00);
+
+	W_C(0xb9);
+	W_D(0x01);//1=PLL disable
+	W_D(0x00);
+
+	W_C(0xc9);
+	W_D(0x02);
+	W_D(0x23);   //p1: HS-Data-zero  p2: HS-Data- prepare  --> 8031 issue
+	delay_ms(100);
+
+	W_C(0xCA);
+	W_D(0x01);//CLK Prepare
+	W_D(0x23);//Clk Zero
+
+	W_C(0xCB); //local_write_reg(addr=0xCB,data=0x0510)
+	W_D(0x10); //Clk Post
+	W_D(0x05); //Clk Per
+
+	W_C(0xCC); //local_write_reg(addr=0xCC,data=0x100A)
+	W_D(0x05); //HS Trail
+	W_D(0x10); //Clk Trail
+
+	W_C(0xD0);
+	W_D(0x00);
+	W_D(0x00);
+
+	//RGB interface configuration
+	W_C(0xB1);
+	W_D(HSPW);//HSPW 07
+	W_D(VSPW);//VSPW 05
+
+	W_C(0xB2);
+	W_D(HBPD);//HBPD 0x64=100
+	W_D(VBPD);//VBPD 8 减小下移
+
+	W_C(0xB3);
+	W_D(HFPD);//HFPD 8
+	W_D(VFPD);//VFPD 10
+
+	W_C(0xB4);//Horizontal active period 720=02D0
+	W_D(0xD0);//013F=319 02D0=720
+	W_D(0x02);
+
+	W_C(0xB5);//Vertical active period 1280=0500
+	W_D(0x00);//01DF=479 0500=1280
+	W_D(0x05);
+
+	
+	W_C(0xB6);//RGB CLK  16BPP=00 18BPP=01
+	W_D(0x07);//D7=0 D6=0 D5=0  D1-0=11 – 24bpp
+	W_D(0x20);//D15=VS D14=HS D13=CLK D12-9=NC D8=0=Video with blanking packet. 00-F0
+
+
+
+	//MIPI lane configuration
+	W_C(0xDE);//通道数
+	W_D(0x03);//11=4LANE 10=3LANE 01=2LANE 00=1LANE
+	W_D(0x00);
+
+	W_C(0xD6);//  05=BGR  04=RGB
+	W_D(0x05);//D0=0=RGB 1:BGR D1=1=Most significant byte sent first
+	W_D(0x00);
+
+
+	W_C(0xB7);
+	W_D(0x4B);
+	W_D(0x02);
+
+	W_C(0x2C);   //打开显示
+	//W_C(0x3C);
+
+
+  
+}  
+
+
+
+void W_C(int data)
+{
+
+
+// RS=0
+   int i;
+
+   LCD_CS_CLR;
+   
+   
+   spi_delay();
+   LCD_SDA_CLR;
+   spi_delay();
+   LCD_SCL_CLR;
+   spi_delay();
+   LCD_SCL_SET;spi_delay();
+
+   for(i=0;i<8;i++)
+   {
+
+   if (data & 0x80)
+      {LCD_SDA_SET;spi_delay();}
+   else
+      {LCD_SDA_CLR;spi_delay();}
+
+    data<<= 1;
+    LCD_SCL_CLR;
+   spi_delay();
+    LCD_SCL_SET;
+  spi_delay();
+
+    }
+ LCD_CS_SET;spi_delay();
+  
+}
+
+
+
+   
+void W_D(int data)
+{
+
+
+//RS=1
+   int i;
+
+   LCD_CS_CLR;
+ 
+ 
+   spi_delay();
+  LCD_SDA_SET;//BIT8=0 COMM
+  spi_delay();
+   LCD_SCL_CLR;
+  spi_delay();
+   LCD_SCL_SET;spi_delay();
+
+   for(i=0;i<8;i++)
+   {
+
+   if (data & 0x80)
+      {LCD_SDA_SET;spi_delay();}
+   else
+      {LCD_SDA_CLR;spi_delay();}
+
+    data<<= 1;
+    LCD_SCL_CLR;
+  spi_delay();
+    LCD_SCL_SET;
+   spi_delay();
+
+    }
+LCD_CS_SET;spi_delay();
+   
+ }
+ 
+void writed16(int data)
+ {
+ 
+ 
+//RS=1
+   int i;
+
+   LCD_CS_CLR;
+ 
+ 
+ spi_delay();
+  LCD_SDA_SET;//BIT8=0 COMM
+ spi_delay();
+   LCD_SCL_CLR;
+ spi_delay();
+   LCD_SCL_SET;spi_delay();
+
+   for(i=0;i<8;i++)
+   {
+
+   if (data & 0x80)
+     { LCD_SDA_SET;spi_delay();}
+   else
+      {LCD_SDA_CLR;spi_delay();}
+
+    data<<= 1;
+    LCD_SCL_CLR;
+  spi_delay();
+    LCD_SCL_SET;
+  spi_delay();
+
+    }
+LCD_CS_SET;spi_delay();
+ 
+ 
+ }
+ 
+ void GP_COMMAD_PA(int a)
+{
+ 	W_C(0xBC);
+	writed16(a);
+	writed16(a>>8);
+	W_C(0xBF);
+}
+/*============================================================================*/
+static	void  spi_delay(void)
+{
+  volatile	int i;
+  for(i=0;i<10;i++);
+}
+
+
+
+/*============================================================================*/
+/*============================================================================*/
+/*============================================================================*/
+/*============================================================================*/

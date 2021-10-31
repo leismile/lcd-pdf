@@ -1,0 +1,101 @@
+ST7789V_H2_CPT1.5_gamma2.2(void)
+{
+LCD_RESET=1; 
+Delayms(1);                                                //Delay 1ms 
+LCD_RESET=0; 
+Delayms(10);                                               //Delay 10ms 
+LCD_RESET=1); 
+Delayms(120); 
+
+Write(Command ,0x11);
+Delay(120);   
+		
+Write(Command ,0x36); //Memory Data Access Control
+Write(Parameter ,0x00); 
+
+Write(Command ,0x3A); //Interface Pixel Format
+Write(Parameter ,0x05); //MCU-18bit   06
+
+Write(Command , 0x2a); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0xef); 
+
+Write(Command , 0x2b); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0x00); 
+Write(Parameter , 0xef);
+
+Write(Command ,0xb2); //Porch Setting
+Write(Parameter ,0x0C);//Normal BP
+Write(Parameter ,0x0C);//Normal FP
+Write(Parameter ,0x00);//Enable Seperate
+Write(Parameter ,0x33);//idle, BP[7:4], FP[3:0]
+Write(Parameter ,0x33);//partial, BP[7:4], FP[3:0]
+
+Write(Command ,0xb7); //Gate Control
+Write(Parameter ,0x56); //VGH=14.06V, VGL=-11.38
+
+Write(Command ,0xbb); //VCOMS Setting
+Write(Parameter ,0x1E); 
+
+Write(Command ,0xc0); 
+Write(Parameter ,0x2c); 
+
+Write(Command ,0xc2); 
+Write(Parameter ,0x01);
+
+Write(Command ,0xc3); //VRH Set
+Write(Parameter ,0x13); //4.5V
+
+Write(Command ,0xc4); 
+Write(Parameter ,0x20);
+
+Write(Command ,0xc6); //Frame Rate Control in Normal Mode
+Write(Parameter ,0x0f);
+
+Write(Command ,0xd0); //Power Control 1
+Write(Parameter ,0xa4); //
+Write(Parameter ,0xa1); //AVDD=6.8V, AVCL=-4.8V, VDS=2.3V
+
+//----GAMMA------------------------------------
+
+Write(Command ,0xe0);
+Write(Parameter ,0xD0);
+Write(Parameter ,0x03);
+Write(Parameter ,0x08);
+Write(Parameter ,0x0E);
+Write(Parameter ,0x11);
+Write(Parameter ,0x2B);
+Write(Parameter ,0x3B);
+Write(Parameter ,0x44);
+Write(Parameter ,0x4C);
+Write(Parameter ,0x2B);
+Write(Parameter ,0x16);
+Write(Parameter ,0x15);
+Write(Parameter ,0x1E);
+Write(Parameter ,0x21);
+
+Write(Command ,0xe1);
+Write(Parameter ,0xD0);
+Write(Parameter ,0x03);
+Write(Parameter ,0x08);
+Write(Parameter ,0x0E);
+Write(Parameter ,0x11);
+Write(Parameter ,0x2B);
+Write(Parameter ,0x3B);
+Write(Parameter ,0x54);
+Write(Parameter ,0x4C);
+Write(Parameter ,0x2B);
+Write(Parameter ,0x16);
+Write(Parameter ,0x15);
+Write(Parameter ,0x1E);
+Write(Parameter ,0x21);
+
+write(Command ,0xe7); 	//é_†¢2DATA
+Write(Parameter ,0x10);
+
+Write(Command ,0x29);	//Display ON 
+}

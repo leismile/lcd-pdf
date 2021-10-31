@@ -1,0 +1,424 @@
+ void SSD2828_INIT_FIRST(void)
+ {
+	 unsigned int tmp=0;
+	 SPI_SSD2828_WR_REG(0xb7,0x0050);
+	//SPI_SSD2828_WR_REG(0xb7,0x0342);// Only use dcs;clock lane is in hs;lp mode 
+ 
+	 SPI_SSD2828_WR_REG(0xb8,0x0000);
+ 
+	 SPI_SSD2828_WR_REG(0xb9,0x0000);// disable pll
+ 
+	 __delay_cycles(10000);
+ 
+ 
+
+	 tmp=construct_pll_config(408000,24000);
+	 SPI_SSD2828_WR_REG(0xba,tmp);// 0x8450,pll=24*80/4=480MHz,2.08ns,nibble_clk=8.33ns
+  
+	__delay_cycles(10000);
+ 
+	tmp=construct_lp_clk_config(10000,408000);
+	SPI_SSD2828_WR_REG(0xbb,tmp); //5, lp clk=480/6/8=10MHz
+	
+ 	SPI_SSD2828_WR_REG(0xb8,0x0000);
+ 
+	 SPI_SSD2828_WR_REG(0xb9,0x0001);
+ 
+	 do
+	 {
+		 tmp=SPI_SSD2828_RD_REG(0xc6); // PLL IS LOCKED
+	 }while((tmp & BIT7)==0);
+ 
+	 SPI_SSD2828_WR_REG(0xde,0x0001);// 2lane
+
+ 
+ }
+
+ void SSD2828_INIT_SECOND(void)
+ {
+	 unsigned int tmp=0;
+ 
+	 SPI_SSD2828_WR_REG(0xb7,0x0050);
+ 
+	 SPI_SSD2828_WR_REG(0xb8,0x0000);
+ 
+	 SPI_SSD2828_WR_REG(0xb9,0x0000);
+	 __delay_cycles(10000);
+ 
+
+	tmp=construct_pll_config(600000,24000);
+	SPI_SSD2828_WR_REG(0xba,tmp);// 0x8450,pll=24*80/4=500MHz,2ns,nibble_clk=8ns
+
+	 __delay_cycles(10000);
+ 
+	tmp=construct_lp_clk_config(10000,600000);
+	SPI_SSD2828_WR_REG(0xbb,tmp); // 
+ 
+	 __delay_cycles(10000);
+ 
+	 SPI_SSD2828_WR_REG(0xb9,0x0001);// pll enable
+ 
+	 do
+	 {
+		 tmp=SPI_SSD2828_RD_REG(0xc6); // PLL IS LOCKED
+	 }while((tmp & BIT7)==0);
+ 
+	SPI_SSD2828_WR_REG(0xc9,((HZD<<8)+HPD));// HZD=;HPD=
+ 
+	SPI_SSD2828_WR_REG(0xca,((CZD<<8)+CPD));
+ 
+	 SPI_SSD2828_WR_REG(0xcb,((CPED<<8)+CPTD));
+ 
+	 SPI_SSD2828_WR_REG(0xcc,((CTD<<8)+HTD));
+
+ 
+	 __delay_cycles(5000);
+ 
+	 SPI_SSD2828_WR_REG(0xd0,0x0000); // hs tx timer
+ 
+	 __delay_cycles(5000);
+ 
+	 SPI_SSD2828_WR_REG(0xb1,((VSA<<8)+HSA));// VSA=4;HSA=4
+ 
+	 SPI_SSD2828_WR_REG(0xb2,((VBP<<8)+HBP));// VBP=14;HBP=14
+ 
+	 SPI_SSD2828_WR_REG(0xb3,((VFP<<8)+HFP));// VFP=14;HFP=14
+#if(VH_SWAP==0)
+	SPI_SSD2828_WR_REG(0xb4,540); // HACT
+ 
+	 SPI_SSD2828_WR_REG(0xb5,960); // VACT
+	
+#elif(VH_SWAP==1)
+	 SPI_SSD2828_WR_REG(0xb4,960); // HACT
+ 
+	 SPI_SSD2828_WR_REG(0xb5,540); // VACT
+#else
+	SPI_SSD2828_WR_REG(0xb4,720); // HACT
+ 
+	 SPI_SSD2828_WR_REG(0xb5,540); // VACT
+#endif
+ 	
+	 SPI_SSD2828_WR_REG(0xb6,0x0003);// 24bpp
+ // SPI_SSD2828_WR_REG(0xdd,0x0E0E);// VBN=14,VFN=14
+
+ //	SPI_SSD2828_WR_REG(0xed,0x1414);// VSD=0,HSD=0
+ 
+	 SPI_SSD2828_WR_REG(0xde,0x0001);// 2 lane
+ 
+//	 __delay_cycles(10000);
+ 
+//	 SPI_SSD2828_WR_REG(0xd6,0x0005); // color order:RGB
+ 
+	 SPI_SSD2828_WR_REG(0xb7,0x024b);// transmit on;short packet;send EOT;ECC enable;write operation;DCS packet;the clock source is tx_clk;
+								// HS clock is enable;video mode is enable;sleep mode is disable;lane HS mode;HS mode
+	 __delay_cycles(100000);
+
+ 	SPI_3W8B_START;
+	SPI_WR_CMD(0x2c);
+	SPI_3W8B_END;
+ }
+
+
+
+void OLED_INIT(void)
+{	
+	unsigned char dat[10];
+
+	
+	__delay_cycles(40000);
+	P1OUT &= ~POWER630_EN;
+	__delay_cycles(40000);
+	
+	
+
+	Mipi_1V8();
+	
+
+	Mipi_2V8();
+
+	__delay_cycles(40000);
+
+		
+			
+			
+			__delay_cycles(40000);
+
+	
+	P3OUT &= ~BIT6; // RESET PIN LOW(P3.6)
+	__delay_cycles(30000);
+	P3OUT |=BIT6; // RESET PIN HIGH(P3.6)
+	__delay_cycles(30000);
+
+	
+
+	SSD2828_INIT_FIRST();
+
+	dat[0]=0xf0;
+	dat[1]=0x55;
+	dat[2]=0xaa;
+	dat[3]=0x52;
+	dat[4]=0x08;
+	dat[5]=0x00;
+	SPI_SSD2828_WR_OLED(6,dat);
+
+	dat[0]=0xbd;
+	dat[1]=0x01;
+	dat[2]=0x2c;
+	dat[3]=0x14;
+	dat[4]=0x14;
+	dat[5]=0x00;
+	SPI_SSD2828_WR_OLED(6,dat);
+
+	dat[0]=0xc8;
+	dat[1]=0x80;
+	dat[2]=0x12;
+	dat[3]=0x00;
+	dat[4]=0x00;
+	dat[5]=0x01;
+	dat[6]=0x00;
+	dat[7]=0x0e;
+	SPI_SSD2828_WR_OLED(8,dat);
+
+	dat[0]=0xc9;
+	dat[1]=0x80;
+	dat[2]=0x12;
+	dat[3]=0x00;
+	dat[4]=0x00;
+	dat[5]=0x01;
+	dat[6]=0x00;
+	dat[7]=0x0e;
+	SPI_SSD2828_WR_OLED(8,dat);
+
+	dat[0]=0xca;
+	dat[1]=0x83;
+	dat[2]=0xd6;
+	dat[3]=0x00;
+	dat[4]=0x00;
+	dat[5]=0x01;
+	dat[6]=0x00;
+	dat[7]=0x0e;
+	SPI_SSD2828_WR_OLED(8,dat);
+
+	dat[0]=0xcb;
+	dat[1]=0x83;
+	dat[2]=0xd5;
+	dat[3]=0x00;
+	dat[4]=0x00;
+	dat[5]=0x01;
+	dat[6]=0x00;
+	dat[7]=0x0e;
+	SPI_SSD2828_WR_OLED(8,dat);
+
+	dat[0]=0xd1;
+	dat[1]=0x80;
+	dat[2]=0x10;
+	dat[3]=0x20;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xd2;
+	dat[1]=0x80;
+	dat[2]=0x09;
+	dat[3]=0x24;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xd0;
+	dat[1]=0x22;
+	SPI_SSD2828_WR_OLED(2,dat);
+
+	dat[0]=0xf0;
+	dat[1]=0x55;
+	dat[2]=0xaa;
+	dat[3]=0x52;
+	dat[4]=0x08;
+	dat[5]=0x02;
+	SPI_SSD2828_WR_OLED(6,dat);
+
+	dat[0]=0xfe;
+	dat[1]=0x08;
+	dat[2]=0x50;
+	SPI_SSD2828_WR_OLED(3,dat);
+
+	dat[0]=0xed;
+	dat[1]=0x48;
+	dat[2]=0x00;
+	dat[3]=0xe0;
+	dat[4]=0x13;
+	dat[5]=0x08;
+	dat[6]=0x00;
+	dat[7]=0x0c;
+	SPI_SSD2828_WR_OLED(8,dat);
+
+	dat[0]=0xc3;
+	dat[1]=0xf2;
+	dat[2]=0x95;
+	dat[3]=0x04;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xe9;
+	dat[1]=0x00;
+	dat[2]=0x36;
+	dat[3]=0x0b;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xca;
+	dat[1]=0x04;
+	SPI_SSD2828_WR_OLED(2,dat);
+
+	dat[0]=0xe1;
+	dat[1]=0x00;
+	SPI_SSD2828_WR_OLED(2,dat);
+
+	dat[0]=0xf0;
+	dat[1]=0x55;
+	dat[2]=0xaa;
+	dat[3]=0x52;
+	dat[4]=0x08;
+	dat[5]=0x01;
+	SPI_SSD2828_WR_OLED(6,dat);
+
+	dat[0]=0xb0;
+	dat[1]=0x00;
+	dat[2]=0x00;
+	dat[3]=0x00;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xb4;
+	dat[1]=0x07;
+	dat[2]=0x07;
+	dat[3]=0x07;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xb5;
+	dat[1]=0x07;
+	dat[2]=0x07;
+	dat[3]=0x07;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xb6;
+	dat[1]=0x44;
+	dat[2]=0x44;
+	dat[3]=0x44;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xb9;
+	dat[1]=0x04;
+	dat[2]=0x04;
+	dat[3]=0x04;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xba;
+	dat[1]=0x34;
+	dat[2]=0x34;
+	dat[3]=0x34;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0xbe;
+	dat[1]=0x22;
+	dat[2]=0x30;
+	dat[3]=0x70;
+	SPI_SSD2828_WR_OLED(4,dat);
+
+	dat[0]=0x35;
+	dat[1]=0x00;
+	SPI_SSD2828_WR_OLED(2,dat);
+
+		/*******/
+
+#if(VH_SWAP==0) // 540*960
+		dat[0]=0x36;
+		dat[1]=0x00;
+		SPI_SSD2828_WR_OLED(2,dat);
+	
+		dat[0]=0x2a;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x02;
+		dat[4]=0x1B;
+		SPI_SSD2828_WR_OLED(5,dat);
+	
+		dat[0]=0x2b;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x03;
+		dat[4]=0xBF;
+		SPI_SSD2828_WR_OLED(5,dat);
+
+#elif(VH_SWAP==1) // 960*540
+		dat[0]=0x36;
+		dat[1]=0xA2;
+		SPI_SSD2828_WR_OLED(2,dat);
+		__delay_cycles(10000);
+	
+		dat[0]=0x2a;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x03;
+		dat[4]=0xbf;
+		SPI_SSD2828_WR_OLED(5,dat);
+	
+		dat[0]=0x2b;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x02;
+		dat[4]=0x1b;
+		SPI_SSD2828_WR_OLED(5,dat);
+#else // 720*540
+		dat[0]=0x36;
+		dat[1]=0xA0;
+		SPI_SSD2828_WR_OLED(2,dat);
+		__delay_cycles(10000);
+	
+		dat[0]=0x2a;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x02;
+		dat[4]=0xcf;
+		SPI_SSD2828_WR_OLED(5,dat);
+	
+		dat[0]=0x2b;
+		dat[1]=0x00;
+		dat[2]=0x00;
+		dat[3]=0x02;
+		dat[4]=0x1b;
+		SPI_SSD2828_WR_OLED(5,dat);
+#endif
+
+	/*******/
+
+
+	dat[0]=0xc0;
+	dat[1]=0x20;
+	SPI_SSD2828_WR_OLED(2,dat);
+
+	dat[0]=0xc2;
+	dat[1]=0x17;
+	dat[2]=0x17;
+	dat[3]=0x17;
+	dat[4]=0x17;
+	dat[5]=0x17;
+	dat[6]=0x15;
+	SPI_SSD2828_WR_OLED(7,dat);
+
+	Mipi_N4V4();
+
+	dat[0]=0x11;
+	SPI_SSD2828_WR_OLED(1,dat);
+
+	__delay_cycles(300000);
+
+	dat[0]=0x29;
+	SPI_SSD2828_WR_OLED(1,dat);
+
+	__delay_cycles(300000);
+
+		
+
+	SSD2828_INIT_SECOND();
+
+	
+	
+
+	
+}
+
+

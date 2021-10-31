@@ -1,0 +1,192 @@
+//======================================================================
+// Copyright (c) 2016 by Steward Fu
+// All rights reserved
+// 2016/11/14
+//======================================================================
+#include "../include/stc15w4k56s4.h"
+
+#define RST		P54
+#define CS		P43
+#define SCL		P42
+#define SDA		P41
+#define VSYC	P40
+#define HSYC	P37
+#define DCLK	P36
+
+void delayms(unsigned int ms)
+{
+  unsigned int cnt;
+  while(ms--){
+    for(cnt=0; cnt<1000; cnt++);
+  }
+}
+
+void WriteDataSpi3_16Bit(unsigned int dat)
+{
+	int i=0;
+
+	CS = 0;
+	for(i=0; i<16; i++){
+		SCL = 0;			
+		if((dat & 0x8000) == 0x8000){
+			SDA = 1;
+		}
+		else{
+			SDA = 0;
+		}
+		dat<<= 1;
+		SCL = 1;
+	}
+	CS = 1;
+
+}
+
+void reset(void)
+{
+	RST = 0;
+	delayms(300);
+	RST = 1;
+	delayms(300);
+}
+
+void init(void)
+{
+#if 1
+	WriteDataSpi3_16Bit(0x000f);   
+  WriteDataSpi3_16Bit(0x0005); 
+  delayms(50); 
+  WriteDataSpi3_16Bit(0x000f); 
+  WriteDataSpi3_16Bit(0x0005); 
+  delayms(50); 
+  WriteDataSpi3_16Bit(0x000f); 
+  WriteDataSpi3_16Bit(0xf546); 
+  WriteDataSpi3_16Bit(0x9060); 
+  WriteDataSpi3_16Bit(0x5000); 
+  delayms(50); 
+  WriteDataSpi3_16Bit(0x3008); 
+  WriteDataSpi3_16Bit(0x7040); 
+  WriteDataSpi3_16Bit(0xC005); 
+  WriteDataSpi3_16Bit(0xE013); 
+  WriteDataSpi3_16Bit(0x6000);
+#else
+	WriteDataSpi3_16Bit(0x000d);
+	delayms(10);
+	WriteDataSpi3_16Bit(0x0005);//0x01
+	delayms(10);
+	WriteDataSpi3_16Bit(0x0005);
+	delayms(50);
+	WriteDataSpi3_16Bit(0x000d);
+	delayms(10);
+	WriteDataSpi3_16Bit(0x6001);
+	//WriteDataSpi3_16Bit(0x4003);
+	WriteDataSpi3_16Bit(0xa008);
+#endif
+} 
+
+void color(void)
+{
+	int i, j, v, h;
+
+	for(i=0;i<10;i++)//V pulse width
+	{
+		HSYC=1;
+		HSYC=0;
+	}
+  VSYC=1;
+
+	for(i=0;i<2;i++)//V back porch
+	{
+		HSYC=1;
+		for(j=0;j<2;j++)
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+		HSYC=0;
+		for(j=0;j<2;j++)
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+	}
+
+	for(v=0;v<272;v++)
+	{
+		for(i=0;i<41;i++)//H pulse width
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+		HSYC=1;
+
+		for(i=0;i<2;i++)//H back porch
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+
+		for(h=0;h<480;h++)//想讓整個螢幕綠色
+		{
+			DCLK=1;
+			P0=0x55;
+			DCLK=0;
+		}
+
+		for(i=0;i<2;i++)//H front porch
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+		HSYC=0;
+	}
+
+	for(i=0;i<2;i++)//V front porch
+	{
+		HSYC=1;
+		for(j=0;j<2;j++)
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+		HSYC=0;
+		for(j=0;j<2;j++)
+		{
+			DCLK=1;
+			DCLK=0;
+		}
+	}
+	VSYC=0;
+}
+
+void gpio_init(void)
+{
+  P0M0 = 0x00;
+  P0M1 = 0x00;
+  P1M0 = 0x00;
+  P1M1 = 0x00;
+  P2M0 = 0x00;
+  P2M1 = 0x00;
+  P3M0 = 0x00;
+  P3M1 = 0x00;
+  P4M0 = 0x00;
+  P4M1 = 0x00;
+  P5M0 = 0x00;
+  P5M1 = 0x00;
+}
+
+void main(void)
+{
+  gpio_init();
+  AUXR|= 0x80;
+
+	reset();
+  init();
+  color();
+  while(1){
+    P55 = 0;
+    delayms(1000);
+    P55 = 1;
+    delayms(1000);
+  }
+}
+

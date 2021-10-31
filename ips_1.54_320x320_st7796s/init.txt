@@ -1,0 +1,130 @@
+//Void ST7796H_BOE1.54_Initial_Code(void) 
+	//*************LCD Driver Initial **********// 
+	
+	Delay_ms(120);                           // 120ms 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0x36);           
+	SPI_WriteData(0x48);   
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0x3A);           
+	SPI_WriteData(0x77);        // 16.7M Color 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xF0); 
+	SPI_WriteData(0xC3); 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xF0); 
+	SPI_WriteData(0x96); 
+	 
+	GP_COMMAD_PA(3);
+	SPI_WriteData(0xB1);           
+	SPI_WriteData(0xA0);   
+	SPI_WriteData(0x10); 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xB4);           
+	SPI_WriteData(0x00);         //00: Column INV, 01: Dot INV   
+	 
+	GP_COMMAD_PA(5);
+	SPI_WriteData(0xB5);           
+	SPI_WriteData(0x40);   
+	SPI_WriteData(0x40); 
+	SPI_WriteData(0x00);   
+	SPI_WriteData(0x04); 
+
+	GP_COMMAD_PA(4);
+	SPI_WriteData(0xB6);           
+	SPI_WriteData(0x8A);   
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x27);   
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xB9);           
+	SPI_WriteData(0x02); 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xC5);            //VCOM    
+	SPI_WriteData(0x2E);        // 
+	 
+	GP_COMMAD_PA(9);
+	SPI_WriteData(0xE8);           
+	SPI_WriteData(0x40);       
+	SPI_WriteData(0x8A);       
+	SPI_WriteData(0x00);       
+	SPI_WriteData(0x00);       
+	SPI_WriteData(0x29); 
+	SPI_WriteData(0x19); 
+	SPI_WriteData(0xA5); 
+	SPI_WriteData(0x93); 
+	 
+	GP_COMMAD_PA(15);
+	SPI_WriteData(0xe0); 
+	SPI_WriteData(0xf0); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x0e); 
+	SPI_WriteData(0x0a); 
+	SPI_WriteData(0x08); 
+	SPI_WriteData(0x25); 
+	SPI_WriteData(0x38); 
+	SPI_WriteData(0x43); 
+	SPI_WriteData(0x51); 
+	SPI_WriteData(0x38); 
+	SPI_WriteData(0x14); 
+	SPI_WriteData(0x12); 
+	SPI_WriteData(0x32); 
+	SPI_WriteData(0x3f); 
+
+	GP_COMMAD_PA(15);
+	SPI_WriteData(0xe1); 
+	SPI_WriteData(0xf0); 
+	SPI_WriteData(0x08); 
+	SPI_WriteData(0x0d); 
+	SPI_WriteData(0x09); 
+	SPI_WriteData(0x09); 
+	SPI_WriteData(0x26); 
+	SPI_WriteData(0x39); 
+	SPI_WriteData(0x45); 
+	SPI_WriteData(0x52); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x13); 
+	SPI_WriteData(0x16); 
+	SPI_WriteData(0x32); 
+	SPI_WriteData(0x3f); 
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xF0);           
+	SPI_WriteData(0x3C);       
+	 
+	GP_COMMAD_PA(2);
+	SPI_WriteData(0xF0);           
+	SPI_WriteData(0x69); 
+	 
+	GP_COMMAD_PA(1),   
+	SPI_WriteData(0x11);
+	Delay_ms(120);                              // 120ms 
+	 
+	GP_COMMAD_PA(1),   
+	SPI_WriteData(0x29);
+	Delay_ms(50);     // Display ON 
+	 
+	GP_COMMAD_PA(1);
+	SPI_WriteData(0x21);       
+	
+	
+	GP_COMMAD_PA(5);
+	SPI_WriteData(0x2A);           
+	SPI_WriteData(0x00);   
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x3F); 
+	 
+	GP_COMMAD_PA(5);
+	SPI_WriteData(0x2B);           
+	SPI_WriteData(0x00);   
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x3F); 
+	

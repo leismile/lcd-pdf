@@ -1,0 +1,255 @@
+//======================================================================
+// Copyright (c) 2016 by Steward Fu
+// All rights reserved
+// 2016/11/14
+//======================================================================
+#include "../include/stc15w4k56s4.h"
+
+#define CSB   P54
+#define SCL   P43
+#define SDA   P42
+#define RST  P40
+
+void delayms(unsigned int ms)
+{
+  unsigned int cnt;
+  while(ms--){
+    for(cnt=0; cnt<1000; cnt++);
+  }
+}
+
+void LCD_WRITE_CMD(char cmd1)
+{
+  	unsigned char nub;
+
+	CSB=0;
+
+	SCL=0;				 
+	SDA=0;
+	SCL=1;
+	for(nub=0;nub<8;nub++)
+	{
+		SCL=0;			
+			if((cmd1&0x80)==0x80)
+			{
+				SDA=1;
+			}
+			else
+			{
+				SDA=0;
+			}
+			cmd1=(cmd1<<1);
+		SCL=1;
+
+	}
+	CSB=1;
+
+}
+
+void LCD_WRITE_DATA(char dataa)
+{
+  	unsigned char nub;
+
+	CSB=0;	
+
+	SCL=0;		 
+	SDA=1;
+	SCL=1;
+	for(nub=0;nub<8;nub++)
+	{
+		SCL=0;			
+			if((dataa&0x80)==0x80)
+			{
+				SDA=1;
+			}
+			else
+			{
+				SDA=0;
+			}
+			dataa=(dataa<<1);
+		SCL=1;
+	}
+	CSB=1;
+
+}
+void HD_reset(void){
+	RST=1;
+	delayms(1);	
+	RST=0;
+	delayms(10);
+	RST=1;
+	delayms(100);
+}
+
+   void LCD_INIT_ILI9481(void)
+	{
+
+	 LCD_WRITE_CMD(0x11);
+	 	delayms(20);
+
+	 LCD_WRITE_CMD(0xD0);
+	 LCD_WRITE_DATA(0x07);
+	 LCD_WRITE_DATA(0x41);
+	 LCD_WRITE_DATA(0x1d);
+
+	 LCD_WRITE_CMD(0xD1);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x2b);
+	 LCD_WRITE_DATA(0x1f);
+
+	 LCD_WRITE_CMD(0xD2);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0x11);
+
+	 LCD_WRITE_CMD(0xC0);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x3B);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x02);
+	 LCD_WRITE_DATA(0x11);
+	 LCD_WRITE_DATA(0x00);
+
+	 LCD_WRITE_CMD(0xC5);
+	 LCD_WRITE_DATA(0x03);
+
+	 LCD_WRITE_CMD(0xC6);  //interface control
+	 LCD_WRITE_DATA(0x80);
+
+	 LCD_WRITE_CMD(0xC8);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x14);
+	 LCD_WRITE_DATA(0x33);
+	 LCD_WRITE_DATA(0x10);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x16);
+	 LCD_WRITE_DATA(0x44);
+	 LCD_WRITE_DATA(0x36);
+	 LCD_WRITE_DATA(0x77);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x0f);
+	 LCD_WRITE_DATA(0x00);
+
+	 	 	 
+	 LCD_WRITE_CMD(0xF3);
+	 LCD_WRITE_DATA(0x40);
+	 LCD_WRITE_DATA(0x0A);
+
+	 LCD_WRITE_CMD(0xF0);
+	 LCD_WRITE_DATA(0x08);
+
+	 LCD_WRITE_CMD(0xF6);
+	 LCD_WRITE_DATA(0x84);
+
+	 LCD_WRITE_CMD(0xF7);
+	 LCD_WRITE_DATA(0x80);
+
+	 LCD_WRITE_CMD(0x0C);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x55);
+
+	 LCD_WRITE_CMD(0xB4);
+	 LCD_WRITE_DATA(0x00);
+
+	 LCD_WRITE_CMD(0xB3);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0x06);
+	 LCD_WRITE_DATA(0x01);
+
+	 LCD_WRITE_CMD(0x36);
+	 LCD_WRITE_DATA(0x48);
+
+	 LCD_WRITE_CMD(0x3a);
+	 LCD_WRITE_DATA(0x66);
+
+	 LCD_WRITE_CMD(0x20);
+//	 LCD_WRITE_CMD(0x21);
+
+	 LCD_WRITE_CMD(0x2A);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0x3F);
+
+	 LCD_WRITE_CMD(0x2B);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0xdf);
+
+	 delayms(120);
+
+	 LCD_WRITE_CMD(0x29);
+	 delayms(120);
+
+	 LCD_WRITE_CMD(0x2C);
+
+	} 
+
+void LCD_TEST_SingleColor(void)
+{
+     int i,j;
+
+	 LCD_WRITE_CMD(0x2A);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0x3F);
+
+	 LCD_WRITE_CMD(0x2B);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x00);
+	 LCD_WRITE_DATA(0x01);
+	 LCD_WRITE_DATA(0xe0);
+
+	 LCD_WRITE_CMD(0x2C);
+
+	 for (i=0;i<480;i++){
+		for (j=0;j<320;j++){
+		LCD_WRITE_DATA(0x00);
+		LCD_WRITE_DATA(0xff);
+		LCD_WRITE_DATA(0xff);
+
+			}
+		}
+	}
+
+void gpio_init(void)
+{
+  P0M0 = 0x00;
+  P0M1 = 0x00;
+  P1M0 = 0x00;
+  P1M1 = 0x00;
+  P2M0 = 0x00;
+  P2M1 = 0x00;
+  P3M0 = 0x00;
+  P3M1 = 0x00;
+  P4M0 = 0x00;
+  P4M1 = 0x00;
+  P5M0 = 0x00;
+  P5M1 = 0x00;
+}
+
+void main(void)
+{
+  gpio_init();
+  AUXR|= 0x80;
+
+  RST = 0;
+  delayms(150);
+  RST = 1;
+  delayms(150);
+
+  //lcd_init();
+  //lcd_set_color();
+	HD_reset();
+	LCD_INIT_ILI9481();
+	LCD_TEST_SingleColor();
+  while(1){
+    P55 = 0;
+    delayms(1000);
+    P55 = 1;
+    delayms(1000);
+  }
+}
+

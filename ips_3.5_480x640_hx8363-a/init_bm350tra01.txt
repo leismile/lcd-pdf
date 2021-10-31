@@ -1,0 +1,124 @@
+void LCD_Init(void)
+{
+	SPI_CS=0;
+	
+	SPI_RES=1;
+	Delay(10);	 //10
+	SPI_RES=0;
+	Delay(100);	  
+	SPI_RES=1;
+	Delay(200);	  
+
+	////F3500A HX8363-A   VDD=3.3V
+#if 1
+SPI_WriteComm(0xB9);
+SPI_WriteData(0xFF);
+SPI_WriteData(0x83);
+SPI_WriteData(0x63);
+
+//Set_POWER
+SPI_WriteComm(0xB1);
+SPI_WriteData(0x81);
+SPI_WriteData(0x30);
+SPI_WriteData(0x08);//08
+SPI_WriteData(0x36);
+SPI_WriteData(0x01);
+SPI_WriteData(0x13);
+SPI_WriteData(0x10);
+SPI_WriteData(0x10);
+SPI_WriteData(0x35);
+SPI_WriteData(0x3D);
+SPI_WriteData(0x1A);
+SPI_WriteData(0x1A);
+
+//Set COLMOD
+SPI_WriteComm(0x3A);
+SPI_WriteData(0x55);
+
+SPI_WriteComm(0x36); //Memory Access Control 
+SPI_WriteData(0x0A); //0a
+
+SPI_WriteComm(0xC0);
+SPI_WriteData(0x41);
+SPI_WriteData(0x19);
+
+SPI_WriteComm(0xBF);
+SPI_WriteData(0x00);
+SPI_WriteData(0x10);
+
+//Set_RGBIF
+SPI_WriteComm(0xB3);
+SPI_WriteData(0x01);
+
+//Set_CYC
+SPI_WriteComm(0xB4);
+SPI_WriteData(0x01);  //01
+SPI_WriteData(0x12);
+SPI_WriteData(0x72);  //72
+SPI_WriteData(0x12);  //12
+SPI_WriteData(0x06);  //06
+SPI_WriteData(0x03);  //03
+SPI_WriteData(0x54);  //54
+SPI_WriteData(0x03);  //03
+SPI_WriteData(0x4e);   //4e
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);
+
+//Set_VCOM
+SPI_WriteComm(0xB6);
+SPI_WriteData(0x33);  //33	  //27
+
+//Set_PANEL
+
+SPI_WriteComm(0xCC);
+SPI_WriteData(0x02);//02
+
+Delay(120);	  //  50
+
+//Set Gamma 2.2
+
+SPI_WriteComm(0xE0);
+
+SPI_WriteData(0x01);
+SPI_WriteData(0x07);
+SPI_WriteData(0x4C);
+SPI_WriteData(0xB0);
+SPI_WriteData(0x36);
+SPI_WriteData(0x3F);
+SPI_WriteData(0x06);
+SPI_WriteData(0x49);
+SPI_WriteData(0x51);
+SPI_WriteData(0x96);
+SPI_WriteData(0x18);
+SPI_WriteData(0xD8);
+SPI_WriteData(0x18);
+SPI_WriteData(0x50);
+SPI_WriteData(0x13);
+
+SPI_WriteData(0x01);
+SPI_WriteData(0x07);
+SPI_WriteData(0x4C);
+SPI_WriteData(0xB0);
+SPI_WriteData(0x36);
+SPI_WriteData(0x3F);
+SPI_WriteData(0x06);
+SPI_WriteData(0x49);
+SPI_WriteData(0x51);
+SPI_WriteData(0x96);
+SPI_WriteData(0x18);
+SPI_WriteData(0xD8);
+SPI_WriteData(0x18);
+SPI_WriteData(0x50);
+SPI_WriteData(0x13);
+
+Delay(150);	 //50
+
+SPI_WriteComm(0x11);
+
+Delay(200);
+
+SPI_WriteComm(0x29);
+
+#endif
+}
+

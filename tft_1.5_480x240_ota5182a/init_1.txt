@@ -1,0 +1,22 @@
+void OTA5182A_initial()
+{
+
+  WriteDataSpi3_16Bit(0x000f);   
+  WriteDataSpi3_16Bit(0x0005); 
+  Delayms(50); 
+  WriteDataSpi3_16Bit(0x000f); 
+  WriteDataSpi3_16Bit(0x0005); 
+  Delayms(50); 
+  WriteDataSpi3_16Bit(0x000f); 
+  WriteDataSpi3_16Bit(0xf546); 
+  WriteDataSpi3_16Bit(0x9060); 
+  WriteDataSpi3_16Bit(0x5000); 
+  Delayms(50); 
+  WriteDataSpi3_16Bit(0x3008); 
+  WriteDataSpi3_16Bit(0x7040); 
+  WriteDataSpi3_16Bit(0xC005); 
+  WriteDataSpi3_16Bit(0xE013); 
+  WriteDataSpi3_16Bit(0x6000); 
+
+
+}

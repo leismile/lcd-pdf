@@ -1,0 +1,453 @@
+/***********************************************************************
+
+** Created By:     YANG   
+
+** Created Date:   2015-04-27     
+
+** Version:    V0         
+
+** Descriptions: Set_CS:SPI-CS Set_SDI:SPI-SDI Set_SCL:SPI-SCK DATA:DB0-DDB7 HS  VS  DE PCLK=27MzH
+
+**                  Reset:SPI-Reset
+
+************************************************************************/
+
+
+
+
+void SPI_WriteCmd(U8 cmd)
+{
+	U32 kk;
+	
+	Set_CS(0);
+	
+	Set_SDI(0);			//Set DC=0, for writing to Command register
+	Set_SCL(0);
+	Set_SCL(1);
+	
+	Set_SCL(0);
+	for(kk=0;kk<8;kk++)
+	{
+		if((cmd&0x80)==0x80) Set_SDI(1);
+		else         Set_SDI(0);
+		Set_SCL(1);
+		Set_SCL(0);
+		cmd = cmd<<1;	
+	}
+	
+	Set_CS(1);		
+}
+
+void SPI_WriteData(U8 Data)
+{
+	U32 kk;
+	
+	Set_CS(0);
+	
+	Set_SDI(1);			//Set DC=0, for writing to Command register
+	Set_SCL(0);
+	Set_SCL(1);
+	
+	Set_SCL(0);
+	for(kk=0;kk<8;kk++)
+	{
+		if((Data&0x80)==0x80) Set_SDI(1);
+		else         Set_SDI(0);
+		Set_SCL(1);
+		Set_SCL(0);
+		Data=Data<<1;	
+	}	
+	Set_CS(1);		
+}
+
+void SSD2828_WritePackageSize(unsigned char size)
+{
+
+//LPMode,TX_CLK,GenericPacket
+//SPI_WriteCmd(0xB7);
+//SPI_WriteData(0x10);
+//SPI_WriteData(0x02);
+
+SPI_WriteCmd(0xBC);
+SPI_WriteData(size);
+SPI_WriteData(0x00);
+
+SPI_WriteCmd(0xBD);
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);
+
+SPI_WriteCmd(0xBF);
+}
+
+
+void Initial_LCM()
+
+{
+
+
+	Reset(0);  //   0 复位，1 工作
+	Delay(30);  //毫秒延时
+	Reset(1);
+	Delay(30);
+	
+SPI_WriteCmd(0xb7);
+SPI_WriteData(0x50);//  LP mode(DCS mode & HS clk disable) 
+SPI_WriteData(0x00);    
+
+SPI_WriteCmd(0xb8);
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);   //VC(Virtual ChannelID) Control Register
+
+SPI_WriteCmd(0xb9);
+SPI_WriteData(0x00);//1=PLL disable
+SPI_WriteData(0x00);
+
+Delay(10);//毫秒延时 
+//TX_CLK/MS should be between 5Mhz to100Mhz
+
+SPI_WriteCmd(0xBA);
+SPI_WriteData(0x14);
+SPI_WriteData(0x42);
+
+Delay(10);
+
+SPI_WriteCmd(0xBB);
+SPI_WriteData(0x03);
+SPI_WriteData(0x00);
+
+Delay(10);
+
+SPI_WriteCmd(0xb9);
+SPI_WriteData(0x01);//1=PLL disable
+SPI_WriteData(0x00);
+
+Delay(100);
+
+SPI_WriteCmd(0xDE);
+SPI_WriteData(0x03);
+SPI_WriteData(0x00);  
+
+Delay(10);
+
+
+
+SPI_WriteCmd(0xc9);
+SPI_WriteData(0x02);
+SPI_WriteData(0x23);
+
+Delay(100);
+
+
+
+//////////////////Initial  CODE///////////////////////
+
+	//SPI_WriteCmd(0xB7);
+	//SPI_WriteData(0x10);//10=TX_CLK 30=PCLK
+	//SPI_WriteData(0x02);
+
+	//SPI_WriteCmd(0xBD);
+	//SPI_WriteData(0x00);
+	//SPI_WriteData(0x00);
+
+        SSD2828_WritePackageSize(6);
+	SPI_WriteData(0xF0);
+        SPI_WriteData(0x55);
+	SPI_WriteData(0xAA);
+	SPI_WriteData(0x52);
+        SPI_WriteData(0x08);
+        SPI_WriteData(0x00); 
+	SSD2828_WritePackageSize(6);
+	SPI_WriteData(0xBD); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x2C); 
+	SPI_WriteData(0x14); 
+	SPI_WriteData(0x14); 
+	SPI_WriteData(0x00);
+	SSD2828_WritePackageSize(8); 
+	SPI_WriteData(0xC8); 
+	SPI_WriteData(0x80);
+	SPI_WriteData(0x12); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x0E); 
+
+        SSD2828_WritePackageSize(8); 
+	SPI_WriteData(0xC9); 
+	SPI_WriteData(0x80); 
+	SPI_WriteData(0x12); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x0E); 
+	SSD2828_WritePackageSize(8); 
+	SPI_WriteData(0xCA); 
+	SPI_WriteData(0x83); 
+	SPI_WriteData(0xD6); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x0E); 
+	SSD2828_WritePackageSize(8); 
+	SPI_WriteData(0xCB); 
+	SPI_WriteData(0x83); 
+	SPI_WriteData(0xD5); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x01); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x0E); 
+
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xD1); 
+	SPI_WriteData(0x80); 
+	SPI_WriteData(0x10); 
+	SPI_WriteData(0x20);
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xD2); 
+	SPI_WriteData(0x80); 
+	SPI_WriteData(0x09); 
+	SPI_WriteData(0x24);
+	SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0xD0); 
+	SPI_WriteData(0x22);
+
+	SSD2828_WritePackageSize(6); 
+	SPI_WriteData(0xF0); 
+	SPI_WriteData(0x55); 
+	SPI_WriteData(0xAA); 
+	SPI_WriteData(0x52);
+	SPI_WriteData(0x08);
+	SPI_WriteData(0x02); 
+	SSD2828_WritePackageSize(3); 
+	SPI_WriteData(0xFE); 
+	SPI_WriteData(0x08); 
+	SPI_WriteData(0x50);
+	SSD2828_WritePackageSize(8); 
+	SPI_WriteData(0xED); 
+	SPI_WriteData(0x48); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0xE0); 
+	SPI_WriteData(0x13); 
+	SPI_WriteData(0x08); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x0C);
+
+        //SSD2828_WritePackageSize(2);
+	//SPI_WriteData(0xEE); 
+	//SPI_WriteData(0x1D);//20131121 Update
+
+
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xC3); 
+	SPI_WriteData(0xF2); 
+	SPI_WriteData(0x95); 
+	SPI_WriteData(0x04);
+
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xE9); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x36); 
+	SPI_WriteData(0x0B);//20131121 Update
+
+
+	SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0xCA); 
+	SPI_WriteData(0x04);
+	SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0xE1); 
+	SPI_WriteData(0x00);//20131127 Update; 关闭Dimming功能,解决亮度调节慢的问题;
+
+
+	
+
+	SSD2828_WritePackageSize(6); 
+	SPI_WriteData(0xF0); 
+	SPI_WriteData(0x55); 
+	SPI_WriteData(0xAA); 
+	SPI_WriteData(0x52); 
+	SPI_WriteData(0x08); 
+	SPI_WriteData(0x01); 
+
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xB0); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00); 
+	SPI_WriteData(0x00);//20131220 Update;
+
+        SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xB4); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x07);
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xB5); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x07); 
+	SPI_WriteData(0x07);
+
+
+	SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xB6); 
+	SPI_WriteData(0x44); 
+	SPI_WriteData(0x44); 
+	SPI_WriteData(0x44);//20131220 Update;
+
+        SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xB9); 
+	SPI_WriteData(0x04); 
+	SPI_WriteData(0x04); 
+	SPI_WriteData(0x04);
+
+        SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xBA); 
+	SPI_WriteData(0x34); 
+	SPI_WriteData(0x34); 
+	SPI_WriteData(0x34);
+
+        SSD2828_WritePackageSize(4); 
+	SPI_WriteData(0xBE); 
+	SPI_WriteData(0x22);
+	SPI_WriteData(0x30); 
+	SPI_WriteData(0x70);	//20131220 Update;
+
+	SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0x35); 
+	SPI_WriteData(0x00);
+
+	SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0x36); 
+	SPI_WriteData(0x02);
+
+        SSD2828_WritePackageSize(2); 
+	SPI_WriteData(0xC0); 
+	SPI_WriteData(0x20);
+
+        SSD2828_WritePackageSize(7); 
+	SPI_WriteData(0xC2); 
+	SPI_WriteData(0x17); 
+	SPI_WriteData(0x17); 
+	SPI_WriteData(0x17); 
+	SPI_WriteData(0x17); 
+	SPI_WriteData(0x17); 
+	SPI_WriteData(0x15);
+
+	SSD2828_WritePackageSize(1);
+	SPI_WriteData(0x11);
+
+	Delay(300);
+
+	SSD2828_WritePackageSize(1);
+	SPI_WriteData(0x29);
+
+	Delay(300);
+
+////////////////////Initial  CODE/////////////////////
+
+//SSD2828_Initial
+
+SPI_WriteCmd(0xb7);
+SPI_WriteData(0x50);
+SPI_WriteData(0x00);  
+
+ 
+
+SPI_WriteCmd(0xb8);
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);   
+
+
+
+SPI_WriteCmd(0xb9);
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);
+
+
+
+SPI_WriteCmd(0xBA);
+SPI_WriteData(0x28);
+SPI_WriteData(0x82);
+
+
+
+SPI_WriteCmd(0xBB);
+SPI_WriteData(0x07);
+SPI_WriteData(0x00);
+
+
+
+SPI_WriteCmd(0xb9);
+SPI_WriteData(0x01);
+SPI_WriteData(0x00);
+
+
+
+SPI_WriteCmd(0xc9);
+SPI_WriteData(0x02);
+SPI_WriteData(0x23); 
+
+Delay(5);
+
+SPI_WriteCmd(0xCA);
+SPI_WriteData(0x01);
+SPI_WriteData(0x23);
+
+SPI_WriteCmd(0xCB); 
+SPI_WriteData(0x10);
+SPI_WriteData(0x05);
+
+
+SPI_WriteCmd(0xCC); 
+SPI_WriteData(0x05);
+SPI_WriteData(0x10);
+
+Delay(5);
+
+SPI_WriteCmd(0xD0); 
+SPI_WriteData(0x00);
+SPI_WriteData(0x00);
+
+Delay(5);
+
+//LoadLcdParameterConfig();   
+SPI_WriteCmd(0xB1);
+SPI_WriteData(0x04);//HSW
+SPI_WriteData(0x04);//VSW 
+SPI_WriteCmd(0xB2);
+SPI_WriteData(0x0E);//HBP
+SPI_WriteData(0x0E);//VBP 
+SPI_WriteCmd(0xB3);
+SPI_WriteData(0x0E);//HFP
+SPI_WriteData(0x0E);//VFP   
+SPI_WriteCmd(0xB40;
+SPI_WriteData(0x1B);//X7-0
+SPI_WriteData(0x02);//X15-8 
+SPI_WriteCmd(0xB5);
+SPI_WriteData(0xBF);//Y7-0
+SPI_WriteData(0x03);//Y15-8   	
+
+
+SPI_WriteCmd(0xb6);
+SPI_WriteData(0x03);
+SPI_WriteData(0x00);
+
+SPI_WriteCmd(0xDE);
+SPI_WriteData(0x01);  //01 2LINE  02  3LINE  03 4LINE
+SPI_WriteData(0x00);
+
+SPI_WriteCmd(0xD6);
+SPI_WriteData(0x04);
+SPI_WriteData(0x00);
+
+SPI_WriteCmd(0xB7);
+SPI_WriteData(0x4B);
+SPI_WriteData(0x02);
+Delay(100);
+
+SPI_WriteCmd(0x2C);
+
+
+}

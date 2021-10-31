@@ -1,0 +1,149 @@
+   #if 1  	
+   WriteComm(0x0000);  //exiting from deep standby mode 
+   Delay(10);    //spec 1ms 
+   WriteComm(0x0000); 
+   Delay(10);    //spec 1ms 
+   WriteComm(0x0000); 
+   Delay(10);    //spec 1ms 
+
+ 
+   WriteComm(0x05ff);    
+   WriteData(0x0000);    
+   WriteComm(0x001d);  //mode setting 
+   WriteData(0x0005);  //exit standby 
+   Delay(100);    //spec 1ms 
+ 
+   WriteComm(0x0000);  //oscillation setting 
+   WriteData(0x0001);  //set to on 
+   Delay(100);  
+   //Display control 
+   WriteComm(0x0001);  //Driver output control 
+   WriteData(0x0027);  //SS=0  
+   WriteComm(0x0002);  //LCD driver AC control  
+   WriteData(0x0200);  //line inversion 
+   WriteComm(0x0003);  //Entry mode 
+   WriteData(0x0020);  //ID=10  
+   WriteComm(0x0007);  //Display mode 
+   WriteData(0x4004);    //262K Colors, normal drive 
+   WriteComm(0x000d);  //FR period adjustment setting 
+   WriteData(0x0011);  //Ffr=60Hz optimized 
+   Delay(100);
+    
+   //LTPS control settings 
+   WriteComm(0x0012);  //LTPS control setting 1 
+   WriteData(0x0303); 
+   WriteComm(0x0013);  //LTPS control setting 2 
+   WriteData(0x0102); 
+   WriteComm(0x001c);  //Ampl
+   WriteData(0x0000);  //AMP 
+ 
+//Power settings 
+WriteComm(0x0102);  //Powe
+WriteData(0x00f6);    //VCOM
+Delay(500);
+ 
+WriteComm(0x0103);  //Powe
+WriteData(0x0007);    //XVDD
+Delay(100);
+
+WriteComm(0x0105);  //Powe
+WriteData(0x0111); 
+Delay(100);
+ 
+//Gray scale settings (gamma c
+WriteComm(0x0300);   
+WriteData(0x0200);    //chan
+WriteComm(0x0301);   
+WriteData(0x0002);  // 
+WriteComm(0x0302);   
+WriteData(0x0000); 
+WriteComm(0x0303);   
+WriteData(0x0300);  // 
+WriteComm(0x0304);   
+WriteData(0x0700); 
+WriteComm(0x0305);   
+WriteData(0x0070);  // 
+
+
+  WriteComm(0x0402);  //First screen s
+  WriteData(0x0000);  //0 
+  WriteComm(0x0403);  //First screen e
+  WriteData(0x013f);  //319  
+
+WriteComm(0x0406);  //Hor. window start 
+WriteData(0x0000);  //0 
+WriteComm(0x0407);  //Hor. window end ad
+WriteData(0x00ef);  //239 
+WriteComm(0x0408);  //Ver. window start 
+WriteData(0x0000);  //0 
+WriteComm(0x0409);  //Ver. window end ad
+WriteData(0x013f);  //319 
+WriteComm(0x0200);  //Y start address se
+WriteData(0x00ef);  //239 
+WriteComm(0x0201);  //X start address se
+WriteData(0x0000);  //0 
+
+WriteComm(0x0100);
+WriteData(0xC010);
+Delay(500);
+WriteComm(0x0101);
+WriteData(0x0001);
+WriteComm(0x0100);
+WriteData(0xF7FE);
+Delay(800);
+#endif
+
+
+
+void BlockWrite(unsigned int Xstart,unsigned int Xend,unsigned int Ystart,unsigned int Yend) reentrant
+{
+   	
+		     
+	WriteComm(0x406);WriteData(Xstart);		 
+	WriteComm(0x407);WriteData(Xend); 	
+	WriteComm(0x408);WriteData(Ystart);	
+	WriteComm(0x409);WriteData(Yend); 
+	WriteComm(0x0200); 
+	WriteData(Xstart);  
+	WriteComm(0x0201);  
+	WriteData(Ystart);  
+	WriteComm(0x202);
+	
+
+}
+
+
+void WriteComm(unsigned int i)
+{
+	 CS0=0;
+	 RD0=1;
+	 RS=0;
+	 
+ 	 DBH=i>>8;
+	 WR0=0;
+	 WR0=1;	 
+   
+ 	 DBH=i;
+	 WR0=0;
+	 WR0=1;
+
+	 CS0=1; 
+}
+
+void WriteData(unsigned int i)
+{
+	 CS0=0;
+	 RD0=1;
+	 RS=1;	   
+ 	 DBH=i>>8;		 
+	 WR0=0;
+	 WR0=1; 
+	 
+	 DBH=i;	
+	 WR0=0;
+	 WR0=1;
+	 
+	 CS0=1;
+
+	 
+}
